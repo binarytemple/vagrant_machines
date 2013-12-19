@@ -1,0 +1,2 @@
+[dockerbox]
+ubuntu-lxc ansible_ssh_user=root
