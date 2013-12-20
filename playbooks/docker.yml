@@ -1,0 +1,21 @@
+---
+- include: base.yml
+- hosts: dockerbox
+  user: root
+  tasks:
+  - name: add docker apt key
+    action: apt_key url=https://get.docker.io/gpg state=present
+
+  - name: add docker repository
+    action: apt_repository repo='deb http://get.docker.io/ubuntu docker main' state=present update_cache=yes
+
+  - name: install docker
+    action: apt pkg=$item state=present update_cache=yes
+    with_items:
+        - lxc-docker
+    notify: service docker start/enable
+    tags:
+        - installdocker
+  handlers:
+  - name: service docker start/enable
+    action: service name=docker state=restarted enabled=yes

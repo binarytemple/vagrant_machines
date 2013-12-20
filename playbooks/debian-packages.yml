@@ -12,4 +12,5 @@
     - emacs 
     - zsh 
     - tmux
+    - python-pycurl
     when: ansible_lsb.id == "Debian"
