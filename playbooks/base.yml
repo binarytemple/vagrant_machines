@@ -2,7 +2,6 @@
 - include: debian-packages.yml 
 - include: ubuntu-packages.yml  
 - hosts: all
-  user: root
   tasks:
   - name: add templated marker file
     action: template src=../remote/etc/marker.j2 dest=/etc/marker.ansible
