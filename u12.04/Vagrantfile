@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
 
     config.vm.provision "ansible" do |ansible|
         #ansible.raw_arguments = ['--user', 'vagrant']  
-        ansible.playbook = "../playbooks/docker.yml"
+        ansible.playbook = "../playbooks/base.yml"
         ansible.sudo_user = 'root'
         ansible.sudo = true
         ansible.host_key_checking = false

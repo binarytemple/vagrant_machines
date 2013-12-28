@@ -1,9 +1,11 @@
 ---
 - hosts: all
   user: root
+  tags: 
+    - dockerbox
   tasks:
   - name: install multiple packages
-    action: apt name=$item state=installed
+    action: apt name="{{item}}" state=installed
     with_items:
     - vim 
     - netcat 

@@ -2,6 +2,18 @@
 - include: debian-packages.yml 
 - include: ubuntu-packages.yml  
 - hosts: all
+  tags: 
+    - dockerbox
+  vars_files:
+  - variables.yml
+  handlers:
+    - name: updated_ssh
+      action: mail msg="{{ansible_hostname}} ssh updated" subject='Ansible-report Bottle installation' to="{{keys_recipient}}"
+  handlers:
+    - name: generated ssh keys
+      action: mail msg='${ansible_hostname} ssh keys generated' subject="§Ansible-report ssh keys generated" to="{{keys_recipient}}"  attach="/root/.ssh/id_rsa.pub"
+    - name: installed mail
+      action: mail msg="${ansible_hostname} installed" subject="Ansible-report Bottle installation" to="{{keys_recipient}}"
   tasks:
   - name: add templated marker file
     action: template src=../remote/etc/marker.j2 dest=/etc/marker.ansible
@@ -22,12 +34,4 @@
     action: user name=root generate_ssh_key=yes ssh_key_bits=2048   
     notify:
     - generated ssh keys
-  handlers:
-    - name: updated_ssh
-      action: mail msg='${ansible_hostname} ssh updated' subject='Ansible-report Bottle installation' to='irishjava@gmail.com' 
-  handlers:
-    - name: generated ssh keys
-      action: mail msg='${ansible_hostname} ssh keys generated' subject='Ansible-report ssh keys generated ' to='irishjava@gmail.com'  attach="/root/.ssh/id_rsa.pub"
-    - name: installed mail
-      action: mail msg='${ansible_hostname} installed' subject='Ansible-report Bottle installation' to='irishjava@gmail.com' 
 
