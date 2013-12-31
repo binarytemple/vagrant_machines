@@ -1,15 +1,16 @@
 ---
 - include: debian-packages.yml 
+  when: ansible_lsb.id == "Debian"
 - include: ubuntu-packages.yml  
+  when: ansible_lsb.id == "Ubuntu"
 - hosts: all
   tags: 
     - dockerbox
   vars_files:
   - variables.yml
   handlers:
-    - name: updated_ssh
+    - name: updated ssh
       action: mail msg="{{ansible_hostname}} ssh updated" subject='Ansible-report Bottle installation' to="{{keys_recipient}}"
-  handlers:
     - name: generated ssh keys
       action: mail msg='${ansible_hostname} ssh keys generated' subject="§Ansible-report ssh keys generated" to="{{keys_recipient}}"  attach="/root/.ssh/id_rsa.pub"
     - name: installed mail
@@ -26,12 +27,11 @@
   - name: Ensure Bitbucket compatible .ssh/known_hosts is present
     action: copy 
             src="../remote/root/.ssh/known_hosts" 
-            dest="/root/.ssh/known_hosts" 
-            owner=root group=root mode=600
+            dest="{{ansible_env['HOME']}}/.ssh/known_hosts" 
+            owner="{{ansible_env['USER']}}" mode=600
     notify:
-    - updated_ssh
-  - name: Generate ssh public/private keys for the root user, if necessary.
-    action: user name=root generate_ssh_key=yes ssh_key_bits=2048  state=present  shell=/bin/bash 
+    - updated ssh
+  - name: Generate ssh public/private keys for the (default) user, if necessary.
+    action: user name="{{ansible_user_id}}" generate_ssh_key=yes ssh_key_bits=2048  state=present  shell=/bin/bash 
     notify:
     - generated ssh keys
-

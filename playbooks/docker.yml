@@ -1,24 +1,13 @@
 ---
 - include: base.yml
 - hosts: all
-  tags: 
-    - dockerbox 
+  roles:
+        - binarytemple.docker
   tasks:
-  - name: add docker apt key
-    action: apt_key url=https://get.docker.io/gpg state=present
-  - name: add docker repository
-    action: apt_repository repo='deb http://get.docker.io/ubuntu docker main' state=present update_cache=yes
-  - name: install docker
-    action: "apt pkg={{item}} state=present update_cache=yes"
-    with_items:
-        - lxc-docker
-    notify: service docker start/enable
   - name: install sshd
     action: apt name={{item}} state=installed
     with_items:
     - ssh
     - openssh-server
-    when: ansible_lsb.id == "Ubuntu"
-  handlers:
-  - name: service docker start/enable
-    action: service name=docker state=restarted enabled=yes
+  - name: copy docker project to filesystem location
+    action: git repo="git@bitbucket.org:bryan_picsolve/poc_docker.git" dest="{{ansible_env['HOME']}}/poc_docker" version=master
