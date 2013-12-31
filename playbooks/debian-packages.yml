@@ -11,7 +11,9 @@
     - netcat 
     - ngrep
     - tcpdump 
-    - emacs 
-    - zsh 
+    - zsh
+    - git
     - tmux
     - python-pycurl
+    - ssh
+    - openssh-server

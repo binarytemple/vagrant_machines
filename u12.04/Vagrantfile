@@ -36,11 +36,11 @@ Vagrant.configure("2") do |config|
     config.vm.provision "ansible" do |ansible|
         #ansible.raw_arguments = ['--user', 'vagrant']  
         ansible.playbook = "../playbooks/docker.yml"
-        ansible.sudo_user = 'root'
+        #ansible.sudo_user = 'vagrant'
         ansible.sudo = true
         ansible.host_key_checking = false
         #ansible.verbose =  'vvvv'
-        ansible.tags = ['dockerbox']
+        #ansible.tags = ['dockerbox']
         #ansible.limit = [ 'dockerbox']
     end
 
