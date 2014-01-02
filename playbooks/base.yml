@@ -4,7 +4,6 @@
 - include: ubuntu-packages.yml  
   when: ansible_lsb.id == "Ubuntu"
 - hosts: all
-  user: vagrant
   vars_files:
   - variables.yml
   handlers:

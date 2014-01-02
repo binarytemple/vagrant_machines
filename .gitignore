@@ -1,3 +1,6 @@
 *.swp
 .vagrant
 vagrant_ansible_inventory_*
+*.iml
+*.ipr
+*.iws
