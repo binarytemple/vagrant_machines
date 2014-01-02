@@ -2,39 +2,36 @@
 - include: base.yml
 - hosts: all
   sudo: no
-  # handlers:
-  # - name: updated ssh
-  #   action: mail msg="{{ansible_hostname}} ssh updated" subject="ssh updated" to="{{keys_recipient}}"
-  # - name: generated ssh keys
-  #   action: mail msg="{{ansible_hostname}} ssh keys generated" subject="Ansible-report ssh keys generated" to="{{keys_recipient}}" attach="/home/ansible/.ssh/id_rsa.pub"
-  # - name: slurp the generated ssh_key
-  #   action: slurp src="/home/ansible/.ssh/id_rsa.pub"
-  #   register: ssh_content
-  # - name: output the generated ssh_key
-  #   action: debug msg="Contents of ssh public key {{ssh_content}}"
-
+  vars: 
+     local_home: "{{ lookup('env','HOME') }}"
   tasks:
-  #  - name: get value of current user
-  #    action: debug msg="Value of ansible_env['HOME'] is {{ansible_env['HOME']}}"
-  #  - name: get home of current user
-  #    action: debug msg="Value of ansible_env['USER'] is {{ansible_env['USER']}}"
-  #  - name: Generate ssh public/private keys for the (default) user, if necessary.
-  #    action: user name="vagrant" generate_ssh_key=yes ssh_key_bits=2048 state=present shell=/bin/bash
-  #    notify:
-  #    - generated ssh keys
-   - name: Ensure Bitbucket compatible .ssh/known_hosts is present
-     sudo: no
-     action: copy 
-             src='../remote/root/.ssh/known_hosts'
-             dest='/home/vagrant/.ssh/known_hosts'
-             owner='vagrant' mode=600
-             force='no'
-  #    notify:
-  #    - updated ssh
+   - name: get value of current user
+     action: debug msg="Value of ansible_env['HOME'] is {{ansible_env['HOME']}}"
+   
+   - name: make sure root can use SSH agent forwarding of default user
+     lineinfile: dest=/etc/sudoers.d/ansible_ssh_auth_sock_changes
+              state=present
+              create=yes
+              regexp='^Defaults env_keep.*"SSH_AUTH_SOCK"$'
+              line='Defaults env_keep += "SSH_AUTH_SOCK"'
+     sudo: yes
 
-   - name: output user name
-     action: debug msg="user is {{ansible_env['USER']}}"
+   - name: Get value of unpriv user 
+     shell: /usr/bin/id -un
+     sudo: no 
+     register: effective_username
 
-   - name: copy docker project to filesystem location
-     sudo: no
-     action: git repo='git@bitbucket.org:bryan_picsolve/poc_docker.git' dest='vagrant/poc_docker' version=master force=true
+   - name: Get homedir of unpriv user 
+     sudo: no 
+     shell: "echo $HOME"
+     register: effective_homedir
+
+   - name: debug the effective_username
+     action: debug var="Effective username is {{effective_username.stdout}}, homedir is {{effective_homedir.stdout}}"
+
+   - name: Create the setup.sh file in the user homedir 
+     action: template 
+            src=../remote/setup.sh
+            dest="{{effective_homedir.stdout}}/setup.sh"
+            owner="{{effective_username.stdout}}" 
+            mode=0755

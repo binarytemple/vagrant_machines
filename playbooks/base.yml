@@ -9,7 +9,7 @@
   handlers:
     - name: installed mail
       action: mail 
-          msg="${ansible_hostname} installed"
+          msg="{{ansible_hostname}} installed"
           subject="Mail installed"
           to="{{keys_recipient}}"
 
