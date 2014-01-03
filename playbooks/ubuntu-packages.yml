@@ -10,7 +10,8 @@
     - netcat 
     - ngrep
     - tcpdump 
-    - zsh 
+    - zsh
+    - language-pack-UTF-8
     - git
     - tmux
     - python-pycurl
