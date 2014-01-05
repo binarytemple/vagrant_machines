@@ -1,7 +1,7 @@
 ---
 - hosts: all
   roles:
-        - binarytemple.docker
+        - binarytemple.ubuntu.docker.installer
   tasks:
   - name: install multiple packages
     action: apt name="{{item}}" state=installed
