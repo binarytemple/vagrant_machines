@@ -1,0 +1,22 @@
+---
+- include: base.yml
+- hosts: all
+  tasks:
+  - name: install nginx
+    action: apt name="{{item}}" state=installed
+    with_items:
+    - nginx-extras
+    when: ansible_lsb.id == "Ubuntu"
+  - name: make nginx upload directory 
+    action: file path=/var/nginx-upload mode=0755 owner=www-data state=directory  
+  - name: run nginx with permissive put config
+    action: template 
+           src=../remote/etc/nginx-permissive-put.conf
+           dest="/etc/nginx/sites-available/default"
+           owner="root" 
+           mode=0644
+    notify:
+    - restart nginx
+  handlers:
+    - name: restart nginx
+      action: service name=nginx state=restarted

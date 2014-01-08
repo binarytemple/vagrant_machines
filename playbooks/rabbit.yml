@@ -1,0 +1,38 @@
+---
+- hosts: all
+  sudo: no
+  tasks:
+  - action: setup 
+
+  - name: install python pip
+    sudo: yes
+    action: apt name=python-pip
+
+  - name: ensure pika (python rabit client is installed)
+    sudo: yes
+    action: pip name=pika use_mirrors=no 
+
+  - name: install rabbit
+    sudo: yes
+    action: apt name="{{item}}" state=installed
+    with_items:
+    - rabbitmq-server
+    when: ansible_lsb.id == "Ubuntu"
+
+  - name: install rabbit utils dir (rmq)
+    action: copy src=../remote/default_user/rmq  dest="{{ansible_env['HOME']}}/" owner="{{ansible_env['USER']}}"
+    
+
+#  - name: make nginx upload directory 
+#    action: file path=/var/nginx-upload mode=0755 owner=www-data state=directory  
+#  - name: run nginx with permissive put config
+#    action: template 
+#           src=../remote/etc/nginx-permissive-put.conf
+#           dest="/etc/nginx/sites-available/default"
+#           owner="root" 
+#           mode=0644
+#    notify:
+#    - restart nginx
+#  handlers:
+#    - name: restart nginx
+#      action: service name=nginx state=restarted

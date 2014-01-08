@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  sudo: yes
   roles:
         - binarytemple.ubuntu.docker.installer
   tasks:
@@ -11,14 +12,13 @@
     - ngrep
     - tcpdump 
     - zsh
-    - language-pack-UTF-8
     - git
     - tmux
     - python-pycurl
     - ssh
     - openssh-server
-
     when: ansible_lsb.id == "Ubuntu"
+
   - name: ensure (LC_ALL) environment is correct 
     lineinfile:
         dest=/etc/environment
@@ -38,3 +38,8 @@
         state=present
         insertafter=EOF
         create=True
+
+  - name: update the lang system
+    sudo: yes
+    shell: /usr/sbin/locale-gen --no-purge
+    ignore_errors: True
