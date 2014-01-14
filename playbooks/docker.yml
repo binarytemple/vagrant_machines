@@ -1,6 +1,8 @@
 ---
 - include: base.yml
 - hosts: all
+  roles:
+   - binarytemple.ubuntu.docker.installer
   sudo: no
   vars: 
      local_home: "{{ lookup('env','HOME') }}"

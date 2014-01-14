@@ -1,14 +1,22 @@
 ---
 - include: base.yml
 - hosts: all
+  sudo: yes
   tasks:
   - name: install nginx
     action: apt name="{{item}}" state=installed
     with_items:
     - nginx-extras
+    - nginx-common
     when: ansible_lsb.id == "Ubuntu"
-  - name: make nginx upload directory 
-    action: file path=/var/nginx-upload mode=0755 owner=www-data state=directory  
+  - name: make nginx directory 
+    action: file path=/var/nginx mode=0755 owner=www-data state=directory  
+  - name: copy up the local configs directory
+    action: copy src=../remote/nginx/mms/configs dest="/var/nginx/configs" owner="www-data"
+  - name: copy up the local overlays directory
+    action: copy src=../remote/nginx/mms/overlays dest="/var/nginx/overlays" owner="www-data"
+  - name: make the uploads directory
+    action: file path=/var/nginx/uploads mode=0755 owner=www-data state=directory  
   - name: run nginx with permissive put config
     action: template 
            src=../remote/etc/nginx-permissive-put.conf

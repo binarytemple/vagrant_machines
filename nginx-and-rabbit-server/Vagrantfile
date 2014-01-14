@@ -2,49 +2,53 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-
-    config.vm.box = "precise-server"
-    # Forward Nginx 
-    config.vm.network "forwarded_port", guest: 80, host: 8089
-    # Forward RabbitMQ
-    config.vm.network "forwarded_port", guest: 5672, host: 5672  
-
-    # Create a public network, which generally matched to bridged network.
-    # Bridged networks make the machine appear as another physical device on
-    # your network.
-    # config.vm.network :public_network
-
-    # If true, then any SSH connections made will enable agent forwarding.
-    # Default value: false
-#    config.ssh.forward_agent = true
-
-    # Provider-specific configuration so you can fine-tune various
-    # backing providers for Vagrant. These expose provider-specific options.
-    # Example for VirtualBox:
-    config.vm.provider "virtualbox" do |vm|
-
-        # Don't boot with headless mode
-        vm.gui = false
-        # Use VBoxManage to customize the VM. For example to change memory:
-        vm.customize ["modifyvm", :id, "--memory", "1024"]
-        vm.network :private_network, ip: "192.168.69.69"
-        #vm.network "public_network"
-        vm.share_folder("vagrant-root", "/vagrant", ".")
-
-    end
-
-    config.vm.synced_folder ".", "/vagrant", :disabled => true
-
     config.ssh.forward_agent = true
 
-    config.vm.provision "ansible" do |ansible|
-        ansible.playbook = "../playbooks/nginx-and-rabbit.yml"
-        #ansible.playbook = "../playbooks/docker.yml"
-        ansible.sudo = true
-        ansible.host_key_checking = false
-        ansible.verbose =  'vvvv'
-        ansible.extra_vars = { ansible_ssh_user: 'vagrant',
-        ansible_connection: 'ssh'
-        }
+    config.vm.define "nginx_and_rabbit" do |nginx_and_rabbit|
+        nginx_and_rabbit.vm.box = "precise-server"
+
+        # Forward Nginx 
+        nginx_and_rabbit.vm.network "forwarded_port", guest: 80, host: 8089
+        # Forward RabbitMQ
+        nginx_and_rabbit.vm.network "forwarded_port", guest: 5672, host: 5672  
+    
+        # Create a public network, which generally matched to bridged network.
+        # Bridged networks make the machine appear as another physical device on
+        # your network.
+        # config.vm.network :public_network
+    
+        # If true, then any SSH connections made will enable agent forwarding.
+        # Default value: false
+    #    config.ssh.forward_agent = true
+    
+        # Provider-specific configuration so you can fine-tune various
+        # backing providers for Vagrant. These expose provider-specific options.
+        # Example for VirtualBox:
+        nginx_and_rabbit.vm.provider "virtualbox" do |vm|
+    
+            # Don't boot with headless mode
+            vm.gui = false
+            # Use VBoxManage to customize the VM. For example to change memory:
+            vm.customize ["modifyvm", :id, "--memory", "1024"]
+            vm.network :private_network, ip: "192.168.69.69"
+            #vm.network "public_network"
+            vm.share_folder("vagrant-root", "/vagrant", ".")
+    
+        end
+    
+        config.vm.synced_folder ".", "/vagrant", :disabled => true
+    
+        config.ssh.forward_agent = true
+    
+        config.vm.provision "ansible" do |ansible|
+            ansible.playbook = "../playbooks/nginx-and-rabbit.yml"
+            #ansible.playbook = "../playbooks/docker.yml"
+            ansible.sudo = true
+            ansible.host_key_checking = false
+            ansible.verbose =  'vvvv'
+            ansible.extra_vars = { ansible_ssh_user: 'vagrant',
+            ansible_connection: 'ssh'
+            }
+        end
     end
 end
