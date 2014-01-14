@@ -4,8 +4,10 @@
 Vagrant.configure("2") do |config|
 
     config.vm.box = "precise-server"
-
+    # Forward Nginx 
     config.vm.network "forwarded_port", guest: 80, host: 8089
+    # Forward RabbitMQ
+    config.vm.network "forwarded_port", guest: 5672, host: 5672  
 
     # Create a public network, which generally matched to bridged network.
     # Bridged networks make the machine appear as another physical device on
@@ -14,7 +16,7 @@ Vagrant.configure("2") do |config|
 
     # If true, then any SSH connections made will enable agent forwarding.
     # Default value: false
-    config.ssh.forward_agent = true
+#    config.ssh.forward_agent = true
 
     # Provider-specific configuration so you can fine-tune various
     # backing providers for Vagrant. These expose provider-specific options.
@@ -36,14 +38,13 @@ Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
 
     config.vm.provision "ansible" do |ansible|
-        #ansible.raw_arguments = ['--user', 'vagrant']  
         ansible.playbook = "../playbooks/nginx-and-rabbit.yml"
-        #ansible.sudo_user = 'vagrant'
+        #ansible.playbook = "../playbooks/docker.yml"
         ansible.sudo = true
         ansible.host_key_checking = false
         ansible.verbose =  'vvvv'
-        #ansible.tags = ['dockerbox']
-        #ansible.limit = [ 'dockerbox']
+        ansible.extra_vars = { ansible_ssh_user: 'vagrant',
+        ansible_connection: 'ssh'
+        }
     end
-
 end

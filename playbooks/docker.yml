@@ -5,46 +5,6 @@
   vars: 
      local_home: "{{ lookup('env','HOME') }}"
   tasks:
-   - action: setup 
-   - name: get value of current user
-     action: debug msg="Value of ansible_env['HOME'] is {{ansible_env['HOME']}}"
-   - name: make sure root can use SSH agent forwarding of default user
-     sudo: yes
-     lineinfile: dest=/etc/sudoers.d/ansible_ssh_auth_sock_changes
-              state=present
-              create=yes
-              regexp='^Defaults env_keep.*"SSH_AUTH_SOCK"$'
-              line='Defaults env_keep += "SSH_AUTH_SOCK"'
-              owner=root
-              group=root
-              mode=0440
-
-   - name: Get value of unpriv user 
-     sudo: no 
-     shell: /usr/bin/id -un
-     register: effective_username
-
-   - name: Get homedir of unpriv user 
-     sudo: no 
-     shell: "echo $HOME"
-     register: effective_homedir
-
-   - name: debug the effective_username
-     sudo: no 
-     action: debug var="Effective username is {{effective_username.stdout}}, homedir is {{effective_homedir.stdout}}"
-
-   - name: spit out the ansible_env 
-     action: debug msg="{{ansible_env}}"
-
-   #- name: copy docker project to filesystem location
-   #  sudo: no
-   #  #action: git repo='git@bitbucket.org:bryan_picsolve/poc_docker.git' dest='vagrant/poc_docker' version=master force=true
-   #  shell: "git clone git@bitbucket.org:bryan_picsolve/poc_docker.git {{effective_homedir.stdout}}/poc_docker"
-
-   - name: Create the setup.sh file in the user homedir 
+   - name: copy docker project to filesystem location
      sudo: no
-     action: template 
-            src=../remote/setup.sh
-            dest="{{effective_homedir.stdout}}/setup.sh"
-            owner="{{effective_username.stdout}}" 
-            mode=0755
+     action: git repo='git@bitbucket.org:bryan_picsolve/poc_docker.git' dest='vagrant/poc_docker' version=master force=true accept_hostkey=True

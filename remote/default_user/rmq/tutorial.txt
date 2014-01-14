@@ -47,12 +47,6 @@ with a message it receives. Should it be appended to a particular queue? Should
 it be appended to many queues? Or should it get discarded. The rules for that
 are defined by the exchange type.
 
-[exchanges]
-digraph { bgcolor=transparent; truecolor=true; rankdir=LR; node [style=
-"filled"]; // P1 [label="P", fillcolor="#00ffff"]; X [label="X", fillcolor="#
-3333CC"]; Q1 [label="{||||}", fillcolor="red", shape="record"]; Q2 [label="{|||
-|}", fillcolor="red", shape="record"]; // P1 -> X; X -> Q1; X -> Q2; }
-
 There are a few exchange types available: direct, topic, headers and fanout.
 We'll focus on the last one -- the fanout. Let's create an exchange of that
 type, and call it logs:
