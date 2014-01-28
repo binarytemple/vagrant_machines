@@ -10,13 +10,25 @@
     - nginx-common
     when: ansible_lsb.id == "Ubuntu"
   - name: make nginx directory 
-    action: file path=/var/nginx mode=0755 owner=www-data state=directory  
+    action: file path=/var/nginx mode=0755 owner=www-data state=directory
+    notify:
+    - restart nginx
   - name: copy up the local configs directory
     action: copy src=../remote/nginx/mms/configs dest="/var/nginx/configs" owner="www-data"
+    notify:
+    - restart nginx
+  - name: copy up the local images directory
+    action: copy src=../remote/nginx/mms/images dest="/var/nginx/images" owner="www-data"
+    notify:
+    - restart nginx
   - name: copy up the local overlays directory
     action: copy src=../remote/nginx/mms/overlays dest="/var/nginx/overlays" owner="www-data"
+    notify:
+    - restart nginx
   - name: make the uploads directory
     action: file path=/var/nginx/uploads mode=0755 owner=www-data state=directory  
+    notify:
+    - restart nginx
   - name: run nginx with permissive put config
     action: template 
            src=../remote/etc/nginx-permissive-put.conf

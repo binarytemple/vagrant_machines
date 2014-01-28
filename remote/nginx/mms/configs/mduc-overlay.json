@@ -1,7 +1,7 @@
 "ops": [
   "rotate" : { "degrees":90 },
   "resize" : { "width": 100, "height": 140 },
-  "overlay" :{"path":"http://127.0.0.1:8089/overlays/blob.png"},
+  "overlay" :{"path":"http://127.0.0.1:8089/overlays/overmsk1.png"},
   "mduc_overlay" : {
      "fontFace":"Times",
      "colour":"#ff0000",
@@ -12,6 +12,6 @@
      "overlayY2":240
   },
   "output": { "dest":
-    "http://upload.picsolve.com:8908/${YEAR}-${MONTH}-${DAY}/1024-968.${INPUT_IMAGE_NAME}" 
+    "http://127.0.0.1:8089/uploads/${YEAR}-${MONTH}-${DAY}/1024-968.${INPUT_IMAGE_NAME}" 
   }
 ]
