@@ -14,19 +14,23 @@
     notify:
     - restart nginx
   - name: copy up the local configs directory
-    action: copy src=../remote/nginx/mms/configs dest="/var/nginx/configs" owner="www-data"
+    action: copy src=../remote/nginx/mms/configs dest="/var/nginx/" owner="www-data" group="root" mode=0755
     notify:
     - restart nginx
   - name: copy up the local images directory
-    action: copy src=../remote/nginx/mms/images dest="/var/nginx/images" owner="www-data"
+    action: copy src=../remote/nginx/mms/images dest="/var/nginx/" owner="www-data" group="root" mode=0755
     notify:
     - restart nginx
   - name: copy up the local overlays directory
-    action: copy src=../remote/nginx/mms/overlays dest="/var/nginx/overlays" owner="www-data"
+    action: copy src=../remote/nginx/mms/overlays dest="/var/nginx/" owner="www-data" group="root" mode=0755
     notify:
     - restart nginx
   - name: make the uploads directory
-    action: file path=/var/nginx/uploads mode=0755 owner=www-data state=directory  
+    action: file path=/var/nginx/uploads owner="www-data" group="root" mode=0755 state=directory
+  - name: make the (pointofsale) uploads directory
+    action: file path=/var/nginx/pointofsale owner="www-data" group="root" mode=0755 state=directory
+  - name: make the (amazon) uploads directory
+    action: file path=/var/nginx/amazon owner="www-data" group="root" mode=0755 state=directory
     notify:
     - restart nginx
   - name: run nginx with permissive put config

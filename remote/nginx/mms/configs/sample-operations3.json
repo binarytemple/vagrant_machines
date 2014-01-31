@@ -1,0 +1,33 @@
+{
+    "pipelines": {
+        "amazon": {
+            "operations": [
+                {
+                    "operation": "rotate",
+                    "degrees": 90
+                },
+                {
+                    "operation": "resize",
+                    "width": 100,
+                    "height": 140
+                },
+                {
+                    "operation": "overlay",
+                    "path": "http://127.0.0.1:8089/overlays/overmsk1.png"
+                },
+                {
+                    "operation": "text",
+                    "fontFace": "Times",
+                    "colour": "#ff0000",
+                    "size": 40,
+                    "x1": 0,
+                    "x2": 0,
+                    "y1": 240,
+                    "y2": 240,
+                    "text": "${mduc}"
+                }
+            ],
+            "output": "http://127.0.0.1:8089/pointofsale/${day}${month}${hour}${year}.jpg"
+        }
+    }
+}
