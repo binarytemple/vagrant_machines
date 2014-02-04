@@ -1,21 +1,17 @@
 {
-    "pipelines": {
+       "pipelines": {
         "mduc": {
             "operations": [
-                {
-                    "operation": "resize",
-                    "width": 1796,
-                    "height": 1080
-                },
-                {
-                    "operation": "text",
-                    "fontFace": "Impact",
-                    "colour": "red",
-                    "size": 100,
-                    "x1": 300,
-                    "y1": 300,
-                    "text": "${mduc}"
-                }
+{ "operation": "text", "fontFace": "Impact", "colour": "red", "size": 200,    "x1": 200, "y1": 200, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "yellow", "size": 200, "x1": 203, "y1": 203, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "green", "size": 200,  "x1": 206, "y1": 206, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "blue", "size": 200,   "x1": 209, "y1": 209, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "yellow", "size": 200, "x1": 212, "y1": 212, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "pink", "size": 200,   "x1": 215, "y1": 215, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "orange", "size": 200, "x1": 218, "y1": 218, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "magenta", "size": 200,"x1": 221, "y1": 221, "text": "${mduc}" },
+{ "operation": "text", "fontFace": "Impact", "colour": "cyan", "size": 200,   "x1": 224, "y1": 224, "text": "${mduc}" },
+{ "operation": "overlay" , "path" : "http://127.0.0.1:8089/overlays/brony_emblem_corner.png" }
             ],
             "output": "http://127.0.0.1:8089/pointofsale/${day}${month}${hour}${year}-${mduc}.jpg"
         },
@@ -30,5 +26,4 @@
             "output": "http://127.0.0.1:8089/amazon/${day}${month}${hour}${year}.jpg"
         }
     }
-
 }
