@@ -24,3 +24,6 @@
       sha256sum=051b0905e13241de19fbd9efb1e22a421f33429a1db3e4b5e3ae8756b9e4d6a2 
       dest=/tmp/couchbase.deb
     when: ansible_lsb.id == "Ubuntu" and ansible_architecture == "x86_64" and couchbase.stat.exists == false
+  - name: install couchbase if not allready installed 
+    action : shell /usr/bin/dpkg --install /tmp/couchbase.deb
+    when: ansible_lsb.id == "Ubuntu" and couchbase.stat.exists == false
