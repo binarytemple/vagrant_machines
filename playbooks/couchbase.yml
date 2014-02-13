@@ -1,0 +1,26 @@
+---
+- hosts: all
+  sudo: yes
+  pre_tasks:
+  - name: check apt last update
+    stat: path=/opt/couchbase/bin/couchbase-server
+    register: couchbase
+  tasks:
+  - name: install multiple packages
+    action: apt name="{{item}}" state=installed
+    with_items:
+    - couchdb
+    - python-couchdb
+    when: ansible_lsb.id == "Ubuntu"
+  - name: download couchbase (32 bit)
+    action: get_url 
+      url=http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86.deb 
+      sha256sum=8d00532af7f60963e8a3b8002731ddf2245eb1942381337377502bebe4e8b0b6 
+      dest=/tmp/couchbase.deb
+    when: ansible_lsb.id == "Ubuntu" and ansible_architecture == "x86" and couchbase.stat.exists == false
+  - name: download couchbase (64 bit)
+    action: get_url 
+      url=http://packages.couchbase.com/releases/2.2.0/couchbase-server-community_2.2.0_x86_64.deb 
+      sha256sum=051b0905e13241de19fbd9efb1e22a421f33429a1db3e4b5e3ae8756b9e4d6a2 
+      dest=/tmp/couchbase.deb
+    when: ansible_lsb.id == "Ubuntu" and ansible_architecture == "x86_64" and couchbase.stat.exists == false

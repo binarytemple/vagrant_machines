@@ -1,5 +1,5 @@
 ---
-- include: upgrade-debian.yml
+- include: base.yml
 - include: nginx.yml
 - include: rabbit.yml
 - hosts: all

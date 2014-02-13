@@ -1,0 +1,18 @@
+---
+- hosts: all
+- include: base.yml
+  sudo: no
+  tasks:
+  - name: install java development environment
+    action: apt name="{{item}}" state=installed
+    sudo: yes
+    with_items:
+    - maven2
+    - openjdk-7-jdk 
+    - openjdk-7-jre
+  - name : mkdir ~/.m2 
+    action: file path=/home/vagrant/.m2 mode=0755 state=directory
+    sudo: no
+  - name : cp settings.xml
+    action: copy src=../remote/default_user/.m2/settings.xml dest=/home/vagrant/.m2/settings.xml mode=0644
+    sudo: no
