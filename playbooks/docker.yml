@@ -7,6 +7,6 @@
   vars: 
      local_home: "{{ lookup('env','HOME') }}"
   tasks:
-   - name: copy docker project to filesystem location
-     sudo: no
-     action: git repo='git@bitbucket.org:bryan_picsolve/poc_docker.git' dest='vagrant/poc_docker' version=master force=true accept_hostkey=True
+---   - name: copy docker project to filesystem location
+---     sudo: no
+---     action: git repo='git@bitbucket.org:bryan_picsolve/poc_docker.git' dest='vagrant/poc_docker' version=master force=true accept_hostkey=True
