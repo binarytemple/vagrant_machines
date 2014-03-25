@@ -51,56 +51,72 @@
   - action: template src=../remote/riak_cs_files/etc/default/riak-cs.j2 dest=/etc/default/riak-cs mode=0644
   - action: template src=../remote/riak_cs_files/etc/default/stanchion.j2 dest=/etc/default/stanchion mode=0644
 
-  - name: install riak if not already installed 
+  - name: install riak 
     action : shell /usr/bin/dpkg --install /tmp/riak.deb
     when: ansible_lsb.id == "Ubuntu" and etc_riak_app_config.stat.exists == false
 
-  - name: install riak_cs if not already installed 
+  - name: install riak_cs 
     action : shell /usr/bin/dpkg --install /tmp/riak_cs.deb
     when: ansible_lsb.id == "Ubuntu" and etc_riak_cs_app_config.stat.exists == false
 
-  - name: install stanchion if not already installed 
+  - name: install stanchion 
     action : shell /usr/bin/dpkg --install /tmp/stanchion.deb
     when: ansible_lsb.id == "Ubuntu" and usr_sbin_stanchion.stat.exists == false
 
   # We need to add the permissive configuration files
-  - name : cp /etc/riak/app.config 
-    action: template src=../remote/riak_cs_files/etc/riak/app.config.j2 dest=/etc/riak/app.config mode=0644
+  - action: template src=../remote/riak_cs_files/etc/riak/app.config.j2 dest=/etc/riak/app.config mode=0644
     register: config_change
 
-  - name : cp /etc/riak/vm.args
-    action: template src=../remote/riak_cs_files/etc/riak/vm.args.j2 dest=/etc/riak/vm.args mode=0644
+  - action: template src=../remote/riak_cs_files/etc/riak/vm.args.j2 dest=/etc/riak/vm.args mode=0644
     register: config_change
 
-  - name : cp /etc/riak-cs/app.config 
-    action: template src=../remote/riak_cs_files/etc/riak-cs/app.config.j2 dest=/etc/riak-cs/app.config mode=0644
+  - action: template src=../remote/riak_cs_files/etc/riak-cs/app.config.j2 dest=/etc/riak-cs/app.config mode=0644
     register: config_change
 
-  - name : cp /etc/riak-cs/vm.args
-    action: template src=../remote/riak_cs_files/etc/riak-cs/vm.args.j2 dest=/etc/riak-cs/vm.args mode=0644
+  - action: template src=../remote/riak_cs_files/etc/riak-cs/vm.args.j2 dest=/etc/riak-cs/vm.args mode=0644
     register: config_change
 
-  - name : cp /etc/stanchion/app.config 
-    action: template src=../remote/riak_cs_files/etc/stanchion/app.config.j2 dest=/etc/stanchion/app.config mode=0644
+  - action: template src=../remote/riak_cs_files/etc/stanchion/app.config.j2 dest=/etc/stanchion/app.config mode=0644
     register: config_change
 
-  - name : cp /etc/stanchion/vm.args
-    action: template src=../remote/riak_cs_files/etc/stanchion/vm.args.j2 dest=/etc/stanchion/vm.args mode=0644
+  - action: template src=../remote/riak_cs_files/etc/stanchion/vm.args.j2 dest=/etc/stanchion/vm.args mode=0644
     register: config_change
-
-  - name: start riak-cs service
-    action: service name=riak-cs state=started
-    when: config_change|changed
 
   - name: start riak service
-    action: service name=riak state=started
+    action: service name=riak state=restarted
     when: config_change|changed
+
+  - action: shell /usr/sbin/riak ping
+    register: riak_result
+    until: riak_result.stdout.find("pong") != -1
+    retries: 5
+    delay: 10
+
+  - name: start riak-cs service
+    action: service name=riak-cs state=restarted
+    when: config_change|changed
+
+  - action: shell /usr/sbin/riak-cs ping
+    register: riak_cs_result
+    until: riak_cs_result.stdout.find("pong") != -1
+    retries: 5
+    delay: 10
 
   - name: start stanchion service
-    action: service name=stanchion state=started
+    action: service name=stanchion state=restarted
     when: config_change|changed
 
-#   Then we create the s3 admin user
+  - action: shell /usr/sbin/stanchion ping
+    register: stanchion_result
+    until:  stanchion_result.stdout.find("pong") != -1
+    retries: 5
+    delay: 10
+
+#  Create the s3 admin user if the s3creds.txt file doesn't exist.
+
+  - name: Check if s3creds.txt file exists
+    stat: path=/home/vagrant/s3creds.txt
+    register: check_s3creds_path
 
   - name: create the admin user (can repeat multiple times)
     action: uri 
@@ -110,10 +126,12 @@
         HEADER_Content-Type=application/json
         status_code=201,409
         return_content=yes
-    when: config_change|changed
+    when: not check_s3creds_path.stat.exists  
     register: create_admin_result
 
   - name: echo the create_admin_result 
-    action: debug msg="key_id {{ create_admin_result.json.key_id }}, id {{ create_admin_result.json.id }}, key_secret {{ create_admin_result.json.key_secret }}"
+    action: debug msg=key_id {{ create_admin_result.json.key_id }}, id {{ create_admin_result.json.id }}, key_secret {{ create_admin_result.json.key_secret }}
     when: create_admin_result.has_key('json')
 
+  - action: template src=../remote/riak_cs_files/homedir/s3creds.txt.j2 dest=/home/vagrant/s3creds.txt mode=0644
+    when: create_admin_result.has_key('json')
