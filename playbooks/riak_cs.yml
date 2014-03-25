@@ -88,16 +88,16 @@
     action: template src=../remote/riak_cs_files/etc/stanchion/vm.args.j2 dest=/etc/stanchion/vm.args mode=0644
     register: config_change
 
-  - name: restart riak-cs service
-    action: service name=riak-cs state=restarted
+  - name: start riak-cs service
+    action: service name=riak-cs state=started
     when: config_change|changed
 
-  - name: restart riak service
-    action: service name=riak state=restarted
+  - name: start riak service
+    action: service name=riak state=started
     when: config_change|changed
 
-  - name: restart stanchion service
-    action: service name=stanchion state=restarted
+  - name: start stanchion service
+    action: service name=stanchion state=started
     when: config_change|changed
 
 #   Then we create the s3 admin user
