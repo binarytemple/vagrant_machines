@@ -1,0 +1,7 @@
+# Default values for stanchion(1) 
+                            
+MIN_FILENO={{ stanchion_min_fileno }}
+
+if [ $(ulimit -n) -lt ${MIN_FILENO} ]
+    then ulimit -n $MIN_FILENO
+fi

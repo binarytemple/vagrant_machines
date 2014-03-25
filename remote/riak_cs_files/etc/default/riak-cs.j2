@@ -1,0 +1,7 @@
+# Default values for riak-cs(1) 
+                            
+MIN_FILENO={{riak_cs_min_fileno}}
+
+if [ $(ulimit -n) -lt ${MIN_FILENO} ]
+    then ulimit -n $MIN_FILENO
+fi

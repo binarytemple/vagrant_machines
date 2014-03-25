@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+    config.ssh.forward_agent = true
+    config.vm.define "riak_cs" do |riak_cs|
+        riak_cs.vm.box = "precise-server"
+        # Forward Nginx 
+        riak_cs.vm.network "forwarded_port", guest: 80, host: 8089
+        # Forward RabbitMQ
+        # nginx_and_rabbit.vm.network "forwarded_port", guest: 5672, host: 5672  
+    
+        # Create a public network, which generally matched to bridged network.
+        # Bridged networks make the machine appear as another physical device on
+        # your network.
+        # config.vm.network :public_network
+    
+        # If true, then any SSH connections made will enable agent forwarding.
+        # Default value: false
+    #    config.ssh.forward_agent = true
+    
+        # Provider-specific configuration so you can fine-tune various
+        # backing providers for Vagrant. These expose provider-specific options.
+        # Example for VirtualBox:
+        riak_cs.vm.provider "virtualbox" do |vm|
+             # Don't boot with headless mode
+            vm.gui = false
+            # Use VBoxManage to customize the VM. For example to change memory:
+            vm.customize ["modifyvm", :id, "--memory", "1024", "--cpus", 2]
+            vm.network :private_network, ip: "192.168.71.71"
+            #vm.network "public_network"
+            vm.share_folder("vagrant-root", "/vagrant", ".")
+        end    
+        config.vm.synced_folder ".", "/vagrant", :disabled => true
+        config.ssh.forward_agent = true    
+        config.vm.provision "ansible" do |ansible|
+            ansible.playbook = "../playbooks/riak_cs.yml"
+            ansible.sudo = true
+            ansible.host_key_checking = false
+            ansible.verbose =  'vvvv'
+            ansible.extra_vars = { ansible_ssh_user: 'vagrant', ansible_connection: 'ssh',ansible_ssh_args: '-o ForwardAgent=yes' 
+            }
+        end
+    end
+end
