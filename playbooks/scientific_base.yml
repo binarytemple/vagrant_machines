@@ -1,0 +1,9 @@
+---
+- hosts: all
+  tasks:
+  # - action: apt name=python-apt state=installed
+  #   when: ansible_lsb.id == "Scientific" and ansible_lsb.release == "6.2"
+  # - action: apt name={{item}} state=installed
+  #   with_items:
+  #   - libselinux-python
+  #   when: ansible_lsb.id == "Scientific" and ansible_lsb.release == "6.2"

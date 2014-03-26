@@ -26,9 +26,11 @@
               %% specifically dictates letting anonymous users to
               %% create accounts.
  
-%% CHANGED BY BRYAN
-%%             {anonymous_user_creation, false},
-{anonymous_user_creation, true},
+              {% if anonymous_user_creation is defined %}
+               {anonymous_user_creation, true},
+              {% else %}
+               {anonymous_user_creation, true},
+              {% endif %}
 
               %% Admin user credentials. Admin access like
               %% /riak-cs/stats requires this entry to be set
@@ -37,14 +39,11 @@
 
 
               %% app.config for the system to function properly.
-%%              {admin_key, "admin-key"},
-%%              {admin_secret, "admin-secret"},
+%% {admin_key, "admin-key"},
+%% {admin_secret, "admin-secret"},
 
-{admin_key, "IJCP-LGEBKDPQSIQMMDK"},
-{admin_secret, "0AOiKy5EfoIMZcsI9Mx8PCSG8-QhTHhynqhfwQ=="},
-
-                 
-
+%% {admin_key, "IJCP-LGEBKDPQSIQMMDK"},
+%% {admin_secret, "0AOiKy5EfoIMZcsI9Mx8PCSG8-QhTHhynqhfwQ=="},
 
 
               %% Port and IP address to listen on for system

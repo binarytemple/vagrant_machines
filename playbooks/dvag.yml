@@ -1,0 +1,3 @@
+---
+- include: scientific_base.yml
+- include: riak_cs.yml

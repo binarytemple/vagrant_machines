@@ -1,86 +1,38 @@
 ---
 - hosts: all
-  sudo: yes
+  vars_files:
+   - ./riak_cs/vars.yml
   vars:
-    stanchion_min_fileno: 4096
-    riak_min_fileno: 4096
-    riak_cs_min_fileno: 4096
-  pre_tasks:
-  - name: stat riak app.config 
-    stat: path=/etc/riak/app.config
-    register: etc_riak_app_config
-  - name: stat riak_cs app.config 
-    stat: path=/etc/riak-cs/app.config
-    register: etc_riak_cs_app_config
-  - name: stat stanchion 
-    stat: path=/usr/sbin/stanchion 
-    register: usr_sbin_stanchion
+    enable_anon_user_create: True
+- include: riak_cs/redhat.yml
+  when: ansible_lsb.major_release == "6" and ansible_os_family == "RedHat"
+- include: riak_cs/debian.yml
+  when: ansible_os_family == "Debian"
   tasks:
-  - name: download stanchion
-    action: get_url 
-      url=http://s3.amazonaws.com/downloads.basho.com/stanchion/1.4/1.4.3/ubuntu/precise/stanchion_1.4.3-1_amd64.deb 
-      sha256sum=eb4ca8ebafe8369da4f47fd714ddd9886cc31c4a942cb021203230859ce4b5e4
-      dest=/tmp/stanchion.deb
-    when: ansible_lsb.id == "Ubuntu" and usr_sbin_stanchion.stat.exists == false
-
-  - name: download riak
-    action: get_url 
-      url=http://s3.amazonaws.com/downloads.basho.com/riak/1.4/1.4.8/ubuntu/precise/riak_1.4.8-1_amd64.deb 
-      sha256sum=935846e3827bdba58c113f21596041d3f89bde3802e8833876ff009ca4235417
-      dest=/tmp/riak.deb
-    when: ansible_lsb.id == "Ubuntu" and etc_riak_app_config.stat.exists == false
-
-  - name: install libssl0.9.x
-    action: apt name="{{item}}" state=installed
-    with_items:
-    - libssl0.9.8
-    when: ansible_lsb.id == "Ubuntu"
-
-  - name: download riak cs
-    action: get_url 
-      url=http://s3.amazonaws.com/downloads.basho.com/riak-cs/1.4/1.4.5/ubuntu/precise/riak-cs_1.4.5-1_amd64.deb
-      sha256sum=63d033e89fbccb412792a2ffb8428a15c3fc9a8deb5b3091024fddc7237e7ccc
-      dest=/tmp/riak_cs.deb
-    when: ansible_lsb.id == "Ubuntu" and etc_riak_cs_app_config.stat.exists == false
-
-#   # We need to add the permissive configuration files
-#   - name : cp /etc/riak/app.config 
-#     action: template src=../remote/riak_cs_files/etc/default/j2 dest=/etc/default/riak mode=0644
-
-  - action: template src=../remote/riak_cs_files/etc/default/riak.j2 dest=/etc/default/riak mode=0644
-  - action: template src=../remote/riak_cs_files/etc/default/riak-cs.j2 dest=/etc/default/riak-cs mode=0644
-  - action: template src=../remote/riak_cs_files/etc/default/stanchion.j2 dest=/etc/default/stanchion mode=0644
-
-  - name: install riak 
-    action : shell /usr/bin/dpkg --install /tmp/riak.deb
-    when: ansible_lsb.id == "Ubuntu" and etc_riak_app_config.stat.exists == false
-
-  - name: install riak_cs 
-    action : shell /usr/bin/dpkg --install /tmp/riak_cs.deb
-    when: ansible_lsb.id == "Ubuntu" and etc_riak_cs_app_config.stat.exists == false
-
-  - name: install stanchion 
-    action : shell /usr/bin/dpkg --install /tmp/stanchion.deb
-    when: ansible_lsb.id == "Ubuntu" and usr_sbin_stanchion.stat.exists == false
-
-  # We need to add the permissive configuration files
-  - action: template src=../remote/riak_cs_files/etc/riak/app.config.j2 dest=/etc/riak/app.config mode=0644
+   # We need to add the permissive configuration files
+  - action: template src=../../remote/riak_cs_files/etc/riak/app.config.j2 dest=/etc/riak/app.config mode=0644
     register: config_change
+    when: install_riak is defined
 
-  - action: template src=../remote/riak_cs_files/etc/riak/vm.args.j2 dest=/etc/riak/vm.args mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/riak/vm.args.j2 dest=/etc/riak/vm.args mode=0644
     register: config_change
+    when: install_riak is defined
 
-  - action: template src=../remote/riak_cs_files/etc/riak-cs/app.config.j2 dest=/etc/riak-cs/app.config mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/riak-cs/app.config.j2 dest=/etc/riak-cs/app.config mode=0644
     register: config_change
+    when: install_riak_cs is defined
 
-  - action: template src=../remote/riak_cs_files/etc/riak-cs/vm.args.j2 dest=/etc/riak-cs/vm.args mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/riak-cs/vm.args.j2 dest=/etc/riak-cs/vm.args mode=0644
     register: config_change
+    when: install_riak_cs is defined
 
-  - action: template src=../remote/riak_cs_files/etc/stanchion/app.config.j2 dest=/etc/stanchion/app.config mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/stanchion/app.config.j2 dest=/etc/stanchion/app.config mode=0644
     register: config_change
+    when: install_stanchion is defined
 
-  - action: template src=../remote/riak_cs_files/etc/stanchion/vm.args.j2 dest=/etc/stanchion/vm.args mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/stanchion/vm.args.j2 dest=/etc/stanchion/vm.args mode=0644
     register: config_change
+    when: install_stanchion is defined
 
   - name: start riak service
     action: service name=riak state=restarted
@@ -115,7 +67,7 @@
 #  Create the s3 admin user if the s3creds.txt file doesn't exist.
 
   - name: Check if s3creds.txt file exists
-    stat: path=/home/vagrant/s3creds.txt
+    stat: path="{{ansible_env['HOME']}}.s3cfg"
     register: check_s3creds_path
 
   - name: create the admin user (can repeat multiple times)
@@ -133,5 +85,5 @@
     action: debug msg=key_id {{ create_admin_result.json.key_id }}, id {{ create_admin_result.json.id }}, key_secret {{ create_admin_result.json.key_secret }}
     when: create_admin_result.has_key('json')
 
-  - action: template src=../remote/riak_cs_files/homedir/s3creds.txt.j2 dest=/home/vagrant/s3creds.txt mode=0644
+  - action: template src=../remote/riak_cs_files/homedir/s3cfg.j2 dest=/home/vagrant/.s3cfg mode=0644
     when: create_admin_result.has_key('json')

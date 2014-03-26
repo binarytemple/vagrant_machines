@@ -1,0 +1,93 @@
+---
+- hosts: all
+  vars_files:
+   - ./vars.yml
+  pre_tasks:
+  - name: stat riak app.config 
+    stat: path=/etc/riak/app.config
+    register: etc_riak_app_config
+  - name: stat riak_cs app.config 
+    stat: path=/etc/riak-cs/app.config
+    register: etc_riak_cs_app_config
+  - name: stat stanchion 
+    stat: path=/usr/sbin/stanchion 
+    register: usr_sbin_stanchion
+  tasks:
+  # Bootstrap repositories installed with RPMs.  Based on an "a-ha!"
+  - name: bootstrap asterisknow-version install
+    copy: src=../../remote/riak_cs_files/etc/yum.repos.d/ansible-bootstrap-epel.repo
+          dest=/etc/yum.repos.d/
+          owner=root group=root mode=0644
+
+  # - name: asterisknow-version install
+  #   yum: name=asterisknow-version
+  #        enablerepo=ansible-bootstrap-epel
+  #        state=present
+
+  #   # The standard asterisk-11 repository is now present; permanently
+  #   # enable it and install Asterisk.
+
+  # - name: asterisk-11 repository enable
+  #   ini_file: dest=/etc/yum.repos.d/centos-asterisk-11.repo
+  #             section=asterisk-11
+  #             option=enabled
+  #             value=1
+
+  #   - name: asterisk installation
+  #     yum: name=asterisk state=present
+
+
+
+
+
+
+
+
+
+
+
+
+
+# d78e3753f390ffcce21bc0fbc0cc173fdd923ca959cef3de2db556bf4fedc0e5  riak-1.4.8-1.el6.x86_64.rpm
+# efd676523376fe7287ef0bdc78e26e9a9e698dd876097025aaeed1d6ed25a431  riak-cs-1.4.5-1.el6.x86_64.rpm
+# d70d10057de5683a621d0063266221d855daa251dee5a6adf5247448e35184c3  riak-cs-control-1.0.2-1.el6.x86_64.rpm
+# be27c5bdf44e4f49d8a4381e8b6fa51a2d25e16b647f9718de2b5a86b70c10c6  stanchion-1.4.3-1.el6.x86_64.rpm
+
+# wget http://s3.amazonaws.com/downloads.basho.com/riak-cs/1.4/1.4.5/rhel/6/riak-cs-1.4.5-1.el6.x86_64.rpm
+# wget http://s3.amazonaws.com/downloads.basho.com/stanchion/1.4/1.4.3/rhel/6/stanchion-1.4.3-1.el6.x86_64.rpm
+# wget http://s3.amazonaws.com/downloads.basho.com/riak-cs-control/1.0/1.0.2/rhel/6/riak-cs-control-1.0.2-1.el6.x86_64.rpm
+# wget http://s3.amazonaws.com/downloads.basho.com/riak/1.4/1.4.8/rhel/6/riak-1.4.8-1.el6.x86_64.rpm
+
+  # - action: apt name={{item}} state=installed
+  #   with_items:
+  #   - libssl0.9.8
+  #   - s3cmd
+  #   when: ansible_lsb.id == "Ubuntu"
+
+  - action: get_url url=http://s3.amazonaws.com/downloads.basho.com/stanchion/1.4/1.4.3/rhel/6/stanchion-1.4.3-1.el6.x86_64.rpm sha256sum=be27c5bdf44e4f49d8a4381e8b6fa51a2d25e16b647f9718de2b5a86b70c10c6 dest=/tmp/stanchion.rpm
+    when: usr_sbin_stanchion.stat.exists == false
+    register: install_stanchion
+
+  - action: get_url url=http://s3.amazonaws.com/downloads.basho.com/riak/1.4/1.4.8/rhel/6/riak-1.4.8-1.el6.x86_64.rpm sha256sum=d78e3753f390ffcce21bc0fbc0cc173fdd923ca959cef3de2db556bf4fedc0e5 dest=/tmp/riak.rpm
+    when: etc_riak_app_config.stat.exists == false
+    register: install_riak
+
+  - action: get_url url=http://s3.amazonaws.com/downloads.basho.com/riak-cs/1.4/1.4.5/rhel/6/riak-cs-1.4.5-1.el6.x86_64.rpm sha256sum=efd676523376fe7287ef0bdc78e26e9a9e698dd876097025aaeed1d6ed25a431 dest=/tmp/riak-cs.rpm
+    when: etc_riak_cs_app_config.stat.exists == false
+    register: install_riak_cs
+
+  - action: template src=../../remote/riak_cs_files/etc/default/riak.j2 dest=/etc/default/riak mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/default/riak-cs.j2 dest=/etc/default/riak-cs mode=0644
+  - action: template src=../../remote/riak_cs_files/etc/default/stanchion.j2 dest=/etc/default/stanchion mode=0644
+
+  - action : shell /bin/rpm -i /tmp/riak.rpm
+    when: etc_riak_app_config.stat.exists == false
+    register: install_riak    
+
+  - action : shell shell /bin/rpm -i /tmp/riak-cs.rpm
+    when: etc_riak_cs_app_config.stat.exists == false
+    register: install_riak_cs
+
+  - action : shell /bin/rpm --install /tmp/stanchion.rpm
+    when: usr_sbin_stanchion.stat.exists == false
+    register: install_stanchion

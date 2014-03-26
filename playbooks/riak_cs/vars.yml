@@ -1,0 +1,3 @@
+stanchion_min_fileno: 4096
+riak_min_fileno: 4096
+riak_cs_min_fileno: 4096
