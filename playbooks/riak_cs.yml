@@ -4,9 +4,9 @@
    - ./riak_cs/vars.yml
   vars:
     enable_anon_user_create: True
-- include: riak_cs/redhat.yml
+  include: riak_cs/redhat.yml
   when: ansible_lsb.major_release == "6" and ansible_os_family == "RedHat"
-- include: riak_cs/debian.yml
+  include: riak_cs/debian.yml
   when: ansible_os_family == "Debian"
   tasks:
    # We need to add the permissive configuration files

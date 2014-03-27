@@ -2,9 +2,9 @@
 - hosts: all
   vars_files:
    - ./riak/vars.yml
-- include: riak/redhat.yml
+  include: riak/redhat.yml
   when: ansible_lsb.major_release == "6" and ansible_os_family == "RedHat"
-- include: riak/debian.yml
+  include: riak/debian.yml
   when: ansible_os_family == "Debian"
   tasks:
    # We need to add the permissive configuration files
