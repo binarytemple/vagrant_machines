@@ -4,3 +4,5 @@ vagrant_ansible_inventory_*
 *.iml
 *.ipr
 *.iws
+*.sublime-project
+*.sublime-workspace

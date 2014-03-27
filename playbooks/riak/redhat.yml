@@ -1,0 +1,31 @@
+---
+- hosts: all
+  vars_files:
+   - ./vars.yml
+  pre_tasks:
+  - name: stat riak app.config 
+    stat: path=/etc/riak/app.config
+    register: etc_riak_app_config
+  tasks:
+  # Bootstrap repositories installed with RPMs.  Based on an "a-ha!"
+  - name: bootstrap asterisknow-version install
+    copy: src=../../remote/riak_cs_files/etc/yum.repos.d/ansible-bootstrap-epel.repo dest=/etc/yum.repos.d/ owner=root group=root mode=0644
+
+  - name: ansible-bootstrap-epel install
+    yum: name=epel-release enablerepo=ansible-bootstrap-epel state=present
+
+  - name: dkms needed by virtualbox guest additions
+    yum: name={{item}} state=present
+    with_items:
+    - dkms
+    - git
+
+  - action: get_url url=http://s3.amazonaws.com/downloads.basho.com/riak/1.4/1.4.8/rhel/6/riak-1.4.8-1.el6.x86_64.rpm sha256sum=d78e3753f390ffcce21bc0fbc0cc173fdd923ca959cef3de2db556bf4fedc0e5 dest=/tmp/riak.rpm
+    when: etc_riak_app_config.stat.exists == false
+    register: install_riak
+
+  - action: template src=../../remote/riak_files/etc/default/riak.j2 dest=/etc/default/riak mode=0644
+
+  - action : shell /bin/rpm -i /tmp/riak.rpm
+    when: etc_riak_app_config.stat.exists == false
+    register: install_riak    

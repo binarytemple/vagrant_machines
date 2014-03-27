@@ -1,0 +1,27 @@
+---
+- hosts: all
+  vars_files:
+   - ./vars.yml
+  pre_tasks:
+  - name: stat riak app.config 
+    stat: path=/etc/riak/app.config
+    register: etc_riak_app_config
+  tasks:
+  - action: apt name={{item}} state=installed
+    with_items:
+    - libssl0.9.8
+    - dkms
+    - git
+
+    when: ansible_lsb.id == "Ubuntu"
+  - name: download riak
+    action: get_url 
+      url=http://s3.amazonaws.com/downloads.basho.com/riak/1.4/1.4.8/ubuntu/precise/riak_1.4.8-1_amd64.deb 
+      sha256sum=935846e3827bdba58c113f21596041d3f89bde3802e8833876ff009ca4235417
+      dest=/tmp/riak.deb
+    when: ansible_lsb.id == "Ubuntu" and etc_riak_app_config.stat.exists == false
+  - action: template src=../../remote/riak_cs_files/etc/default/riak.j2 dest=/etc/default/riak mode=0644
+
+  - action : shell /usr/bin/dpkg --install /tmp/riak.deb
+    when: etc_riak_app_config.stat.exists == false
+    register: install_riak 
