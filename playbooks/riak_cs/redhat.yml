@@ -15,14 +15,10 @@
   tasks:
   # Bootstrap repositories installed with RPMs.  Based on an "a-ha!"
   - name: bootstrap asterisknow-version install
-    copy: src=../../remote/riak_cs_files/etc/yum.repos.d/ansible-bootstrap-epel.repo
-          dest=/etc/yum.repos.d/
-          owner=root group=root mode=0644
+    copy: src=../../remote/riak_cs_files/etc/yum.repos.d/ansible-bootstrap-epel.repo dest=/etc/yum.repos.d/ owner=root group=root mode=0644
 
-  # - name: asterisknow-version install
-  #   yum: name=asterisknow-version
-  #        enablerepo=ansible-bootstrap-epel
-  #        state=present
+  - name: ansible-bootstrap-epel install
+    yum: name=epel-release enablerepo=ansible-bootstrap-epel state=present
 
   #   # The standard asterisk-11 repository is now present; permanently
   #   # enable it and install Asterisk.
@@ -33,18 +29,11 @@
   #             option=enabled
   #             value=1
 
-  #   - name: asterisk installation
-  #     yum: name=asterisk state=present
+  - name: s3cmd installed
+    yum: name=s3cmd state=present
 
-
-
-
-
-
-
-
-
-
+  - name: dkms needed by virtualbox guest additions
+    yum: name=dkms state=present
 
 
 

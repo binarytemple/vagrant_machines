@@ -4,4 +4,3 @@ mirrorlist = http://mirrors.fedoraproject.org/mirrorlist?repo=epel-$releasever&a
 failovermethod = priority
 enabled = 0
 gpgcheck = 0
-
