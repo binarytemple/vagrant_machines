@@ -1,0 +1,44 @@
+---
+- name: the basho bench installer
+  hosts: all
+#- include: riak.yml 
+#- include: github.yml
+  pre_tasks:
+  - name: stat erl 
+    stat: path=/usr/bin/erl
+    register: usr_bin_erl
+  tasks:
+#  - name: Checkout basho bench
+#    action: git repo=git@github.com:basho/basho_bench.git dest={{ansible_env['HOME']}}/basho_bench
+
+  - name: install multiple packages
+    action: apt name={{item}} state=installed
+    with_items:
+    - vim 
+    - netcat 
+    - ngrep
+    - tcpdump 
+    - git
+    - tmux
+    - python-pycurl
+    - python-pip
+    when: ansible_lsb.id == "Ubuntu"
+
+  - name: checkout basho_bench repository 
+    sudo: no
+    action: git repo=git@github.com:basho/basho_bench.git dest=basho_bench
+
+  - name: download erlang if necessary
+    action: get_url 
+      url=http://packages.erlang-solutions.com/erlang/esl-erlang/FLAVOUR_1_general/esl-erlang_16.b.3-2~ubuntu~precise_amd64.deb 
+      sha256sum=0609f1f37635c17f58d78e5922a257f5eee3e75bccbca5d6f2d2ef6e103cfbbd 
+      dest=/tmp/erlang.deb
+    when: ansible_lsb.id == "Ubuntu" and usr_bin_erl.stat.exists == false
+
+  - name: install erlang if necessary
+    action : shell /usr/bin/dpkg --install /tmp/erlang.deb
+    when: ansible_lsb.id == "Ubuntu" and usr_bin_erl.stat.exists == false
+
+  - name: compile basho_bench 
+    sudo: no
+    action: shell chdir=basho_bench make
