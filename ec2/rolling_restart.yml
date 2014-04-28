@@ -1,9 +1,9 @@
 ---
-- hosts: riak_cluster
+- hosts: tag_value_riak
   serial: 1
   sudo: True
   pre_tasks:
   - name: make sure there are no transfers happening
     riak: wait_for_handoffs=600
   roles:
-  - basho.riak
+  - { role: basho.riak, tags: ["riak"], riak_version: "1.4.8" } 

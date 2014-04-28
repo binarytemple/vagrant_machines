@@ -9,4 +9,4 @@ then
 	ansible-galaxy install -r roles.txt -p roles
 fi
 
-/common/ansible/bin/ansible-playbook -vvvv -i ec2.py boot.yml
+/common/ansible/bin/ansible-playbook -vvvv -i ec2.py -u ubuntu ./rolling_restart.yml
