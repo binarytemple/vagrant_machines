@@ -6,12 +6,14 @@
     connection: local
     gather_facts: False
     tags: provisioning
-    vars:
-      instance_type: m3.medium
-      security_group: rtcloud
-      image: ami-a73264ce
-      region: us-east-1
-      keypair: rtcloud
+#    vars:
+#      instance_type: m3.medium
+#      security_group: rtcloud
+#      image: ami-a73264ce
+#      region: us-east-1
+#      keypair: rtcloud
+    vars_files:
+     - vars.yml
     tasks:
      - name: get em runnning
        local_action:
@@ -57,13 +59,8 @@
     # This uses the hosts that we put into the in-memory hosts repository with the add_host module.
     sudo: yes # On EC2 nodes, this is automatically passwordless. 
     gather_facts: True  #We need to re-enable this, as we turned it off earlier.
+    vars_files:
+     - vars.yml
     roles:
-      - basho.riak-common 
-      - basho.riak
-  - name: install the riaks
-    hosts: tag_value_riak
-    sudo: true
-    roles:
-        - { role: basho.riak, tags: ["riak"], riak_version: "1.4.8" }
-
-#- include: form_cluster.yml
+      - { role: basho.riak-common, tags: ["riak"], riak_version: "{{install_riak_version}}" }
+      - { role: basho.riak, tags: ["riak"], riak_version: "{{install_riak_version}}" }

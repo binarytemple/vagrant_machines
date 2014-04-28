@@ -1,6 +1,7 @@
 - hosts: riak_cluster
+  vars_files:
+   - vars.yml
   sudo: True
   roles:
-  - { role: basho.riak, tags: ["riak"] }
-
+  - { role: basho.riak, tags: ["riak"], riak_version: "{{install_riak_version}}"  }
 - include: form_cluster.yml

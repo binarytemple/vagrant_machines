@@ -6,6 +6,8 @@
     register: riak_outputs
 
 - hosts: tag_value_riak:!tag_value_riak[0]
+  vars_files:
+   - vars.yml
   vars:
      primary_node: "{{ hostvars[groups['tag_value_riak'][0]]['riak_outputs']['node_name'] }}"
   sudo: True
