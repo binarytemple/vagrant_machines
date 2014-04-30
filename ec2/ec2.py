@@ -152,11 +152,14 @@ class Ec2Inventory(object):
         self.parse_cli_args()
 
         # Cache
-        if self.args.refresh_cache:
-            self.do_api_calls_update_cache()
-        elif not self.is_cache_valid():
-            self.do_api_calls_update_cache()
+        #if self.args.refresh_cache:
+        #    self.do_api_calls_update_cache()
+        #elif not self.is_cache_valid():
+        #    self.do_api_calls_update_cache()
 
+
+        self.do_api_calls_update_cache()
+         
         # Data to print
         if self.args.host:
             data_to_print = self.get_host_info()
@@ -244,8 +247,8 @@ class Ec2Inventory(object):
                            help='List instances (default: True)')
         parser.add_argument('--host', action='store',
                            help='Get all the variables about a specific instance')
-        parser.add_argument('--refresh-cache', action='store_true', default=False,
-                           help='Force refresh of cache by making API requests to EC2 (default: False - use cache files)')
+        #parser.add_argument('--refresh-cache', action='store_true', default=False,
+        #                   help='Force refresh of cache by making API requests to EC2 (default: False - use cache files)')
         self.args = parser.parse_args()
 
 

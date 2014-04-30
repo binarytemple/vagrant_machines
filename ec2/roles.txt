@@ -1,2 +1,3 @@
 basho.riak-common,v1.0.2
 basho.riak,v1.0.7
+binarytemple.riak2,master
