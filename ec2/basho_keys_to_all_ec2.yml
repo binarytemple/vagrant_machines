@@ -1,0 +1,54 @@
+---
+# Based heavily on the Ansible documentation on EC2:
+# http://docs.ansible.com/ec2_module.html
+  - name: Provision our EC2 nodes
+    hosts: security_group_rtcloud 
+    tags: provisioning
+    vars_files:
+     - vars.yml
+    tasks:
+    - name: add github key
+      sudo: yes
+      lineinfile: dest=/etc/ssh/ssh_known_hosts line='|1|KWI6LgcTkLS4a3J/jfyOaS6CIKE=|VIpECtP9TDwqZvzNIUSd01ZyKTI= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' owner=root state=present create=True
+
+    - name: update apt
+      action: apt state=installed update_cache=yes upgrade=yes     
+      sudo: yes
+      when: ansible_lsb.id == "Ubuntu"
+
+    - name: install multiple packages
+      action: apt name={{item}} state=installed 
+      sudo: yes
+      with_items:
+      - vim 
+      - netcat 
+      - ngrep
+      - tcpdump 
+      - git
+      - tmux
+      - python-pycurl
+      - python-pip
+      - make
+      - g++
+      - erlang
+      when: ansible_lsb.id == "Ubuntu"
+
+    - name: checkout basho ssh keys
+      sudo: no
+      action: git repo=git@github.com:basho/ssh_keys.git dest=basho_ssh_keys
+
+    - shell: grep 'acd@Christians-MacBook-Air.local' .ssh/authorized_keys > /dev/null || ( stat basho_ssh_keys/christian_dahlqvist && cat basho_ssh_keys/christian_dahlqvist >> .ssh/authorized_keys)
+    - shell: grep 'bryan@basho-catah.local' .ssh/authorized_keys > /dev/null || ( stat basho_ssh_keys/bhunt && cat basho_ssh_keys/bhunt >> .ssh/authorized_keys)
+    - shell: grep 'dbrown@basho.com' .ssh/authorized_keys > /dev/null || ( stat basho_ssh_keys/dbrown && cat basho_ssh_keys/dbrown >> .ssh/authorized_keys)
+
+
+
+
+
+    # - name: install bench configs 
+    #   sudo: no
+    #   template: src=templates/william_hill/{{item}}.j2 dest=configs/{{item}} mode=0640
+    #   with_items: 
+    #    - wh_preload_1.config
+    #    - wh_run_1.config
+    #    - wh_run_2.config

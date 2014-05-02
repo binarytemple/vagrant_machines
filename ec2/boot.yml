@@ -6,12 +6,6 @@
     connection: local
     gather_facts: False
     tags: provisioning
-#    vars:
-#      instance_type: m3.medium
-#      security_group: rtcloud
-#      image: ami-a73264ce
-#      region: us-east-1
-#      keypair: rtcloud
     vars_files:
      - vars.yml
     tasks:
@@ -23,6 +17,7 @@
         instance_type : "{{ instance_type}}"
         image: "{{ image }}"
         keypair: "{{ keypair }}"
+        user_data: "riak_node"
         wait: yes
         instance_tags:
             Name: installtype
@@ -48,20 +43,23 @@
        with_items: ec2.instances
        when: ec2_vol is not defined and ec2 is defined and ec2.instances is defined and attach_volumes is defined and provisioned_iops is not defined
 
+     - name: debug those instance id's 
+       debug: msg="{{ec2}}" 
+
      - name: Wait for SSH to come up
        local_action: wait_for host={{ item.public_ip }} port=22 delay=1 timeout=320 state=started
        with_items: ec2.instances 
-       when: ec2 is defined and ec2.instances is defined
+       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
 
      - name: Debug the names of the instances
        debug: msg="{{item.public_ip}}"
        with_items: ec2.instances
-       when: ec2 is defined and ec2.instances is defined
+       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
 
      - name: Add the instances to the in-memory playbook, as the riak group
        add_host: hostname="{{item.public_ip}}" groups=tag_value_riak ansible_ssh_host="{{item.dns_name}}" ansible_ssh_port=22
        with_items: ec2.instances
-       when: ec2 is defined and ec2.instances is defined
+       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
 
   - name: With the newly provisioned EC2 node configure that thing
     hosts: tag_value_riak

@@ -1,0 +1,20 @@
+{% raw %}
+{mode, max}.
+{duration, 20}.
+{concurrent, 1}.
+{driver, basho_bench_driver_riakc_pb}.
+{key_generator, {to_binstr, "~10..0B", {sequential_int, 30000}}}.
+{value_generator, {fixed_bin, 600000}}.
+{ riakc_pb_ips, [
+{% endraw %}
+{% for host in groups.tag_value_riak %}
+   {% if loop.last %}
+      {{'{{'}} {{ hostvars[host]['ansible_default_ipv4']['address'] | replace(".",",") }} } , 8087 } 
+   {% else %}
+      {{'{{'}} {{ hostvars[host]['ansible_default_ipv4']['address'] | replace(".",",") }} } , 8087 } ,
+   {% endif %} 
+{% endfor %}
+]} .
+{% raw %}
+{operations, [{put, 1}]}.
+{% endraw %}
