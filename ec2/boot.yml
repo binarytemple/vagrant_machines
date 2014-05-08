@@ -26,40 +26,52 @@
         count_tag:
             Name: installtype
             value: riak
-       register: ec2
+       register: ec2_res
+
+
+     - name: debug ec2_res
+       debug: msg="{{ec2_res}}" 
+       when: ec2_res is defined and ec2_res.instances != None 
+
+
+     - name: debug ec2_res.instances
+       debug: msg="{{ec2_res.instances}}" 
+       when: ec2_res is defined and ec2_res.instances != None 
 
      - name: debug those instance id's 
        debug: msg="{{item}}" 
-       with_items: ec2.instances
-       when: ec2 is defined and ec2.instances is defined
+       with_items: ec2_res.instances
+       when: ec2_res is defined and ec2_res.instances != None 
 
      - name: attach big volumes 
        local_action: ec2_vol instance="{{item.id}}" volume_size=5  region="{{region}}" iops="{{provisioned_iops}}"
-       with_items: ec2.instances
-       when: ec2_vol is not defined and ec2 is defined and ec2.instances is defined and attach_volumes is defined and provisioned_iops is defined
+       with_items: ec2_res.instances
+       when: ec2_vol is not defined and ec2_res is defined and  ec2_res.instances != None and attach_volumes is defined and provisioned_iops is defined
+       ignore_errors: yes
 
      - name: attach big volumes 
-       local_action: ec2_vol instance="{{item.id}}" volume_size=5  region="{{region}}" 
-       with_items: ec2.instances
-       when: ec2_vol is not defined and ec2 is defined and ec2.instances is defined and attach_volumes is defined and provisioned_iops is not defined
+       local_action: ec2_vol instance="{{item.id}}" volume_size=5  region="{{region}}" id="{blah}"
+       with_items: ec2_res.instances
+       when: ec2_vol is not defined and ec2_res is defined and ec2_res.instances != None and attach_volumes is defined and provisioned_iops is not defined
+       ignore_errors: yes
 
      - name: debug those instance id's 
-       debug: msg="{{ec2}}" 
+       debug: msg="{{ec2_res}}" 
 
      - name: Wait for SSH to come up
        local_action: wait_for host={{ item.public_ip }} port=22 delay=1 timeout=320 state=started
-       with_items: ec2.instances 
-       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
+       with_items: ec2_res.instances 
+       when: ec2_res is defined and ec2_res.instances is defined and ec2_res.instances != None
 
      - name: Debug the names of the instances
        debug: msg="{{item.public_ip}}"
-       with_items: ec2.instances
-       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
+       with_items: ec2_res.instances
+       when: ec2_res is defined and ec2_res.instances is defined and ec2_res.instances != None
 
      - name: Add the instances to the in-memory playbook, as the riak group
        add_host: hostname="{{item.public_ip}}" groups=tag_value_riak ansible_ssh_host="{{item.dns_name}}" ansible_ssh_port=22
-       with_items: ec2.instances
-       when: ec2 is defined and ec2.instances is defined and ec2.instances != None
+       with_items: ec2_res.instances
+       when: ec2_res is defined and ec2_res.instances is defined and ec2_res.instances != None
 
   - name: With the newly provisioned EC2 node configure that thing
     hosts: tag_value_riak
@@ -70,5 +82,19 @@
      - vars.yml
     roles:
       - { role: basho.riak-common, tags: ["riak"]}
-      - { role: binarytemple.riak2, tags: ["riak"], riak_version: "{{install_riak_version}}",  when: riak_custom_package is not defined }
-      - { role: binarytemple.riak2, tags: ["riak"], riak_custom_package: "http://s3.amazonaws.com/downloads.basho.com/riak/2.0/2.0.0pre11/ubuntu/precise/riak_2.0.0pre11-1_amd64.deb", when: riak_custom_package is defined  }
+      - { role: binarytemple.riak2, 
+          tags: ["riak"], 
+          riak_version: "{{install_riak_version}}",    
+          riak_tune_disks: true,
+          riak_tune_os: true,
+          riak_mountpoint: /mnt,
+          riak_partition:  /dev/xvdb,
+          when: boot_riak_custom_package is not defined }
+      - { role: binarytemple.riak2, 
+          tags: ["riak"], 
+          riak_tune_disks: true,
+          riak_tune_os: true,
+          riak_mountpoint: /mnt,
+          riak_partition:  /dev/xvdb,
+          riak_custom_package: "{{boot_riak_custom_package}}",
+          when: boot_riak_custom_package is defined  }

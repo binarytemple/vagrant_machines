@@ -17,12 +17,12 @@ image: ami-290b1440  # HVM ubuntu 12.04 image
 # ami-a73264ce
 region: us-east-1
 keypair: rtcloud
-install_riak_version: 1.4.8
+#install_riak_version: 1.4.8
 
 # if defined, will ignore the install_riak_version parameter 
-# riak_custom_package: "http://s3.amazonaws.com/downloads.basho.com/riak/2.0/2.0.0pre11/ubuntu/precise/riak_2.0.0pre11-1_amd64.deb" 
-
-cluster_host_count: 5
+boot_riak_custom_package: "http://s3.amazonaws.com/downloads.basho.com/riak/2.0/2.0.0pre11/ubuntu/precise/riak_2.0.0pre11-1_amd64.deb" 
+cluster_host_count: 1
 # If ec2_spot_price is defined, try to obtain spot instances
 # ec2_spot_price: 0.24
+attach_volumes: True
 # provisioned_iops: 30
