@@ -6,7 +6,7 @@ bench_image: ami-290b1440  # HVM ubuntu 12.04 image
 #bench_image: ami-018c9568 
 bench_region: us-east-1
 bench_keypair: rtcloud
-bench_enabled: True
+bench_enabled: False
 
 #instance_type: m3.medium
 instance_type: m3.2xlarge
@@ -20,7 +20,8 @@ keypair: rtcloud
 #install_riak_version: 1.4.8
 
 # if defined, will ignore the install_riak_version parameter 
-boot_riak_custom_package: "http://s3.amazonaws.com/downloads.basho.com/riak/2.0/2.0.0pre11/ubuntu/precise/riak_2.0.0pre11-1_amd64.deb" 
+boot_riak_custom_package: "http://s3.amazonaws.com/private.downloads.basho.com/riak_ee/20b089/1.4.8/ubuntu/precise/riak-ee_1.4.8-1_amd64.deb"
+# boot_riak_custom_package: "http://s3.amazonaws.com/downloads.basho.com/riak/2.0/2.0.0pre11/ubuntu/precise/riak_2.0.0pre11-1_amd64.deb" 
 cluster_host_count: 1
 # If ec2_spot_price is defined, try to obtain spot instances
 # ec2_spot_price: 0.24

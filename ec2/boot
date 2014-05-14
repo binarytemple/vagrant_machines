@@ -1,4 +1,4 @@
 #!/bin/zsh
 
-source ./common.zsh
+source ./.common
 ansible-playbook -vvvv -i ec2.py -u ubuntu boot.yml
